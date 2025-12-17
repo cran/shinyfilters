@@ -1,6 +1,6 @@
 Package: shinyfilters
-Title: Use Shiny to Filter Data
-Version: 0.1.0
+Title: Use 'shiny' to Filter Data
+Version: 0.2.0
 Authors@R: 
     person(
         "Josh", "Livingston",
@@ -22,8 +22,8 @@ URL: https://joshwlivingston.github.io/shinyfilters/,
         https://github.com/joshwlivingston/shinyfilters
 BugReports: https://github.com/joshwlivingston/shinyfilters/issues
 NeedsCompilation: no
-Packaged: 2025-12-11 14:25:32 UTC; Josh Livingston
+Packaged: 2025-12-17 15:29:02 UTC; Josh Livingston
 Author: Josh Livingston [cre, aut]
 Maintainer: Josh Livingston <joshwlivingston@gmail.com>
 Repository: CRAN
-Date/Publication: 2025-12-17 10:20:08 UTC
+Date/Publication: 2025-12-17 23:20:02 UTC

@@ -22,10 +22,17 @@ data.frames, and more.
 
 ## Installation
 
-You can install the development version from Github:
+The latest release is available on CRAN:
 
 ``` r
-pak("joshwlivingston/shinyfilters")
+# install.packages("pak")
+pak::pak("shinyfilters")
+```
+
+Or, you can install the development version:
+
+``` r
+pak::pak("joshwlivingston/shinyfilters")
 ```
 
 ## Usage
@@ -131,7 +138,7 @@ You can extend `shinyfilters` by adding or overwriting methods to the
 following:
 
 - `filterInput()`, `updateFilterInput()`
-- `args_filter_input()`, `args_update_filter_input()`
+- `args_filter_input()`
 - `get_filter_logical()`
 
 See `vignette("customizing-shinyfilters")` for more.
