@@ -39,80 +39,6 @@ expect_shiny_sliderInput <- expect_shiny_input(shiny::sliderInput)
 expect_shiny_dateRangeInput <- expect_shiny_input(shiny::dateRangeInput)
 expect_shiny_dateInput <- expect_shiny_input(shiny::dateInput)
 
-# Setup ####
-letters_shuffled <- sample(letters)
-choices_fct <- as.factor(letters_shuffled)
-choices_fct_with_na <- choices_fct
-NA -> choices_fct_with_na[
-	sample(
-		1:length(choices_fct),
-		sample(1:(length(choices_fct) - 1), 1)
-	)
-]
-
-choices_lst <- as.list(letters_shuffled)
-choices_lst_with_na <- choices_lst
-NA -> choices_lst_with_na[
-	sample(
-		1:length(choices_lst),
-		sample(1:(length(choices_lst) - 1), 1)
-	)
-]
-
-choices_chr <- letters_shuffled
-choices_chr_with_na <- choices_chr
-NA -> choices_chr_with_na[
-	sample(
-		1:length(choices_chr),
-		sample(1:(length(choices_chr) - 1), 1)
-	)
-]
-
-choices_log <- c(TRUE, FALSE)
-choices_log_with_na <- choices_log
-NA -> choices_log_with_na[sample(1:2, 1)]
-
-choices_num <- 1:10
-choices_num_with_na <- choices_num
-NA -> choices_num_with_na[
-	sample(
-		1:length(choices_num),
-		sample(1:(length(choices_num) - 1), 1)
-	)
-]
-
-choices_dte <- sample(Sys.Date() + 0:9)
-choices_dte_with_na <- choices_dte
-NA -> choices_dte_with_na[
-	sample(
-		1:length(choices_dte),
-		sample(1:(length(choices_dte) - 1), 1)
-	)
-]
-
-choices_psc <- sample(Sys.time() + as.difftime(0:9, units = "days"))
-choices_psc_with_na <- choices_psc
-NA -> choices_psc_with_na[
-	sample(
-		1:length(choices_psc),
-		sample(1:(length(choices_psc) - 1), 1)
-	)
-]
-
-choices_psl <- sample(as.POSIXlt(Sys.time() + as.difftime(0:9, units = "days")))
-choices_psl_with_na <- choices_psl
-NA -> choices_psl_with_na[
-	sample(
-		1:length(choices_psl),
-		sample(1:(length(choices_psl) - 1), 1)
-	)
-]
-
-choices_chr_na <- rep(NA_character_, 10)
-choices_cpx_na <- rep(NA_complex_, 10)
-choices_rel_na <- rep(NA_real_, 10)
-choices_int_na <- rep(NA_integer_, 10)
-
 # Logical Paths ####
 
 ## All NA's
@@ -314,7 +240,56 @@ test_that("character + `textbox = TRUE` + `area = TRUE` -> shiny::textAreaInput"
 })
 
 ## Radio Buttons ####
-### logical ####
+### factor or list + `radio = TRUE` ####
+test_that("factor + `radio = TRUE` -> shiny::radioButtons", {
+	expect_shiny_radioButtons(
+		x = choices_fct,
+		inputId = "",
+		label = "",
+		radio = TRUE
+	)
+})
+
+### list + `radio = TRUE` ####
+test_that("list + `radio = TRUE` -> shiny::radioButtons", {
+	expect_shiny_radioButtons(
+		x = choices_lst,
+		inputId = "",
+		label = "",
+		radio = TRUE
+	)
+})
+
+### logical + `radio = TRUE` ####
+test_that("logical + `radio = TRUE` -> shiny::radioButtons", {
+	expect_shiny_radioButtons(
+		x = choices_log,
+		inputId = "",
+		label = "",
+		radio = TRUE
+	)
+})
+
+### character + `textbox` not provided + `radio = TRUE` ####
+test_that("character + `textbox not provided` + `radio = TRUE` -> shiny::radioButtons", {
+	expect_shiny_radioButtons(
+		x = choices_chr,
+		inputId = "",
+		label = "",
+		radio = TRUE
+	)
+})
+
+### character + `textbox = FALSE` + `radio = TRUE` ####
+test_that("character + `textbox = FALSE` + `radio = TRUE` -> shiny::radioButtons", {
+	expect_shiny_radioButtons(
+		x = choices_chr,
+		inputId = "",
+		label = "",
+		textbox = FALSE,
+		radio = TRUE
+	)
+})
 
 ## Numeric Input ####
 ### numeric + `slider` not provided ####
@@ -433,94 +408,374 @@ test_that("POSIXlt + `range` not provided -> shiny::dateInput", {
 	)
 })
 
-# Filter Input Arguments ####
-## list ####
-test_that("args_filter_input() returns provided list as choices argument", {
-	expect_identical(
-		args_filter_input(choices_lst_with_na),
-		list(choices = choices_lst_with_na)
-	)
+# data.frames ####
+
+test_that("data.frame with mixed types returns htmltools::tagList", {
+	res <- filterInput(test_df)
+	expect_s3_class(res, "shiny.tag.list")
 })
 
-## factor, logical ####
-test_that("args_filter_input() (factor, logical) returns sorted, unique values as choices argument", {
-	expect_identical(
-		args_filter_input(choices_fct_with_na),
-		list(choices = unique(sort(choices_fct_with_na)))
-	)
-	expect_identical(
-		args_filter_input(choices_log_with_na),
-		list(choices = unique(sort(choices_log_with_na)))
-	)
+test_that("data.frame with mixed types creates correct number of inputs", {
+	res <- filterInput(test_df)
+	# Should have 4 inputs (one per column)
+	expect_equal(length(res), ncol(test_df))
 })
 
-
-## character ####
-test_that("args_filter_input() default returns sorted, unique values as choices argument", {
-	expect_identical(
-		args_filter_input(choices_chr_with_na),
-		list(choices = unique(sort(choices_chr_with_na)))
-	)
+test_that("data.frame list has correct names", {
+	res <- filterInput(test_df)
+	# The names should match the column names
+	expect_equal(names(res), get_input_ids(test_df))
 })
 
-test_that("args_filter_input() (character) with textbox = FALSE returns sorted, unique values as choices argument", {
-	expect_identical(
-		args_filter_input(choices_chr_with_na, textbox = FALSE),
-		list(choices = unique(sort(choices_chr_with_na)))
-	)
-})
-
-test_that("args_filter_input() with textbox = TRUE returns NULL for character vectors", {
-	expect_null(
-		args_filter_input(choices_chr_with_na, textbox = TRUE)
-	)
-})
-
-## numeric ####
-test_that("args_filter_input() returns min, max, and max for numeric vectors", {
-	expect_identical(
-		args_filter_input(choices_num_with_na),
+test_that("data.frame chr_col (character) -> shiny::selectInput", {
+	res <- filterInput(test_df)
+	args_shiny_chr <- c(
 		list(
-			min = min(choices_num_with_na, na.rm = TRUE),
-			max = max(choices_num_with_na, na.rm = TRUE),
-			value = max(choices_num_with_na, na.rm = TRUE)
-		)
+			inputId = get_input_ids(test_df[, "chr_col", drop = FALSE]),
+			label = get_input_labels(test_df[, "chr_col", drop = FALSE])
+		),
+		args_filter_input(test_df$chr_col)
+	)
+	expect_identical(
+		res$chr_col,
+		do.call(shiny::selectInput, args_shiny_chr)
 	)
 })
 
-## Date ####
-test_that("args_filter_input() returns min, max, max for Date vectors", {
-	expect_identical(
-		args_filter_input(choices_dte_with_na),
+test_that("data.frame fct_col (factor) -> shiny::selectInput", {
+	res <- filterInput(test_df)
+	args_shiny_fct <- c(
 		list(
-			min = min(choices_dte_with_na, na.rm = TRUE),
-			max = max(choices_dte_with_na, na.rm = TRUE),
-			value = max(choices_dte_with_na, na.rm = TRUE)
-		)
+			inputId = get_input_ids(test_df[, "fct_col", drop = FALSE]),
+			label = get_input_labels(test_df[, "fct_col", drop = FALSE])
+		),
+		args_filter_input(test_df$fct_col)
+	)
+	expect_identical(
+		res$fct_col,
+		do.call(shiny::selectInput, args_shiny_fct)
 	)
 })
 
-## POSIXt ####
-### POSIXct ####
-test_that("args_filter_input() returns min and max Dates for POSIXct vectors", {
-	expect_identical(
-		args_filter_input(choices_psc_with_na),
+test_that("data.frame num_col (numeric) -> shiny::numericInput", {
+	res <- filterInput(test_df)
+	args_shiny_num <- c(
 		list(
-			min = min(as.Date(choices_psc_with_na), na.rm = TRUE),
-			max = max(as.Date(choices_psc_with_na), na.rm = TRUE),
-			value = max(as.Date(choices_psc_with_na), na.rm = TRUE)
-		)
+			inputId = get_input_ids(test_df[, "num_col", drop = FALSE]),
+			label = get_input_labels(test_df[, "num_col", drop = FALSE])
+		),
+		args_filter_input(test_df$num_col)
+	)
+	expect_identical(
+		res$num_col,
+		do.call(shiny::numericInput, args_shiny_num)
 	)
 })
 
-### POSIXlt ####
-test_that("args_filter_input() returns min and max Dates for POSIXlt vectors", {
-	expect_identical(
-		args_filter_input(choices_psl_with_na),
+test_that("data.frame dte_col (Date) -> shiny::dateInput", {
+	res <- filterInput(test_df)
+	args_shiny_dte <- c(
 		list(
-			min = min(as.Date(choices_psl_with_na), na.rm = TRUE),
-			max = max(as.Date(choices_psl_with_na), na.rm = TRUE),
-			value = max(as.Date(choices_psl_with_na), na.rm = TRUE)
-		)
+			inputId = get_input_ids(test_df[, "dte_col", drop = FALSE]),
+			label = get_input_labels(test_df[, "dte_col", drop = FALSE])
+		),
+		args_filter_input(test_df$dte_col)
+	)
+	expect_identical(
+		res$dte_col,
+		do.call(shiny::dateInput, args_shiny_dte)
+	)
+})
+
+# ns argument ####
+
+## Vector inputs with ns ####
+
+test_that("character + ns -> shiny::selectInput with namespaced inputId", {
+	ns <- shiny::NS("mymodule")
+	res <- filterInput(
+		x = choices_chr,
+		inputId = "my_input",
+		label = "Label",
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("my_input"),
+			label = "Label"
+		),
+		args_filter_input(choices_chr)
+	)
+	expect_identical(res, do.call(shiny::selectInput, args_shiny))
+})
+
+test_that("factor + ns -> shiny::selectInput with namespaced inputId", {
+	ns <- shiny::NS("test_module")
+	res <- filterInput(
+		x = choices_fct,
+		inputId = "factor_input",
+		label = "Select",
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("factor_input"),
+			label = "Select"
+		),
+		args_filter_input(choices_fct)
+	)
+	expect_identical(res, do.call(shiny::selectInput, args_shiny))
+})
+
+test_that("logical + ns -> shiny::selectInput with namespaced inputId", {
+	ns <- shiny::NS("logic_mod")
+	res <- filterInput(
+		x = choices_log,
+		inputId = "logical_input",
+		label = "Pick",
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("logical_input"),
+			label = "Pick"
+		),
+		args_filter_input(choices_log)
+	)
+	expect_identical(res, do.call(shiny::selectInput, args_shiny))
+})
+
+test_that("numeric + ns -> shiny::numericInput with namespaced inputId", {
+	ns <- shiny::NS("num_module")
+	res <- filterInput(
+		x = choices_num,
+		inputId = "numeric_input",
+		label = "Number",
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("numeric_input"),
+			label = "Number"
+		),
+		args_filter_input(choices_num)
+	)
+	expect_identical(res, do.call(shiny::numericInput, args_shiny))
+})
+
+test_that("Date + ns -> shiny::dateInput with namespaced inputId", {
+	ns <- shiny::NS("date_mod")
+	res <- filterInput(
+		x = choices_dte,
+		inputId = "date_input",
+		label = "Date",
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("date_input"),
+			label = "Date"
+		),
+		args_filter_input(choices_dte)
+	)
+	expect_identical(res, do.call(shiny::dateInput, args_shiny))
+})
+
+test_that("character + textbox = TRUE + ns -> shiny::textInput with namespaced inputId", {
+	ns <- shiny::NS("text_module")
+	res <- filterInput(
+		x = choices_chr,
+		inputId = "text_input",
+		label = "Text",
+		textbox = TRUE,
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("text_input"),
+			label = "Text"
+		),
+		args_filter_input(choices_chr, textbox = TRUE)
+	)
+	expect_identical(res, do.call(shiny::textInput, args_shiny))
+})
+
+test_that("character + textbox = TRUE + area = TRUE + ns -> shiny::textAreaInput with namespaced inputId", {
+	ns <- shiny::NS("textarea_mod")
+	res <- filterInput(
+		x = choices_chr,
+		inputId = "textarea_input",
+		label = "Area",
+		textbox = TRUE,
+		area = TRUE,
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("textarea_input"),
+			label = "Area"
+		),
+		args_filter_input(choices_chr, textbox = TRUE)
+	)
+	expect_identical(res, do.call(shiny::textAreaInput, args_shiny))
+})
+
+test_that("factor + radio = TRUE + ns -> shiny::radioButtons with namespaced inputId", {
+	ns <- shiny::NS("radio_module")
+	res <- filterInput(
+		x = choices_fct,
+		inputId = "radio_input",
+		label = "Radio",
+		radio = TRUE,
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("radio_input"),
+			label = "Radio"
+		),
+		args_filter_input(choices_fct)
+	)
+	expect_identical(res, do.call(shiny::radioButtons, args_shiny))
+})
+
+test_that("factor + selectize = TRUE + ns -> shiny::selectizeInput with namespaced inputId", {
+	ns <- shiny::NS("selectize_mod")
+	res <- filterInput(
+		x = choices_fct,
+		inputId = "selectize_input",
+		label = "Selectize",
+		selectize = TRUE,
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("selectize_input"),
+			label = "Selectize"
+		),
+		args_filter_input(choices_fct)
+	)
+	expect_identical(res, do.call(shiny::selectizeInput, args_shiny))
+})
+
+test_that("numeric + slider = TRUE + ns -> shiny::sliderInput with namespaced inputId", {
+	ns <- shiny::NS("slider_mod")
+	res <- filterInput(
+		x = choices_num,
+		inputId = "slider_input",
+		label = "Slider",
+		slider = TRUE,
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("slider_input"),
+			label = "Slider"
+		),
+		args_filter_input(choices_num)
+	)
+	expect_identical(res, do.call(shiny::sliderInput, args_shiny))
+})
+
+test_that("Date + range = TRUE + ns -> shiny::dateRangeInput with namespaced inputId", {
+	ns <- shiny::NS("daterange_mod")
+	res <- filterInput(
+		x = choices_dte,
+		inputId = "daterange_input",
+		label = "Date Range",
+		range = TRUE,
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("daterange_input"),
+			label = "Date Range"
+		),
+		args_filter_input(choices_dte, range = TRUE)
+	)
+	expect_identical(res, do.call(shiny::dateRangeInput, args_shiny))
+})
+
+test_that("list + ns -> shiny::selectInput with namespaced inputId", {
+	ns <- shiny::NS("list_mod")
+	res <- filterInput(
+		x = choices_lst,
+		inputId = "list_input",
+		label = "List",
+		ns = ns
+	)
+	args_shiny <- c(
+		list(
+			inputId = ns("list_input"),
+			label = "List"
+		),
+		args_filter_input(choices_lst)
+	)
+	expect_identical(res, do.call(shiny::selectInput, args_shiny))
+})
+
+## data.frame with ns ####
+
+test_that("data.frame chr_col (character) + ns -> shiny::selectInput with namespaced inputId", {
+	ns <- shiny::NS("df_module")
+	res <- filterInput(test_df, ns = ns)
+	args_shiny_chr <- c(
+		list(
+			inputId = ns(get_input_ids(test_df[, "chr_col", drop = FALSE])),
+			label = get_input_labels(test_df[, "chr_col", drop = FALSE])
+		),
+		args_filter_input(test_df$chr_col)
+	)
+	expect_identical(
+		res$chr_col,
+		do.call(shiny::selectInput, args_shiny_chr)
+	)
+})
+
+test_that("data.frame fct_col (factor) + ns -> shiny::selectInput with namespaced inputId", {
+	ns <- shiny::NS("df_module")
+	res <- filterInput(test_df, ns = ns)
+	args_shiny_fct <- c(
+		list(
+			inputId = ns(get_input_ids(test_df[, "fct_col", drop = FALSE])),
+			label = get_input_labels(test_df[, "fct_col", drop = FALSE])
+		),
+		args_filter_input(test_df$fct_col)
+	)
+	expect_identical(
+		res$fct_col,
+		do.call(shiny::selectInput, args_shiny_fct)
+	)
+})
+
+test_that("data.frame num_col (numeric) + ns -> shiny::numericInput with namespaced inputId", {
+	ns <- shiny::NS("df_module")
+	res <- filterInput(test_df, ns = ns)
+	args_shiny_num <- c(
+		list(
+			inputId = ns(get_input_ids(test_df[, "num_col", drop = FALSE])),
+			label = get_input_labels(test_df[, "num_col", drop = FALSE])
+		),
+		args_filter_input(test_df$num_col)
+	)
+	expect_identical(
+		res$num_col,
+		do.call(shiny::numericInput, args_shiny_num)
+	)
+})
+
+test_that("data.frame dte_col (Date) + ns -> shiny::dateInput with namespaced inputId", {
+	ns <- shiny::NS("df_module")
+	res <- filterInput(test_df, ns = ns)
+	args_shiny_dte <- c(
+		list(
+			inputId = ns(get_input_ids(test_df[, "dte_col", drop = FALSE])),
+			label = get_input_labels(test_df[, "dte_col", drop = FALSE])
+		),
+		args_filter_input(test_df$dte_col)
+	)
+	expect_identical(
+		res$dte_col,
+		do.call(shiny::dateInput, args_shiny_dte)
 	)
 })

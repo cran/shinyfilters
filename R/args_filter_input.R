@@ -9,30 +9,38 @@
 #'
 #' @details
 #' The following arguments are supported in `...`:
-#' \tabular{ll}{
-#'   `range` \tab
+#' \describe{
+#'   \item{range}{
 #'   *(Date, POSIXt)*. Logical. If `TRUE`, `args_filter_input()` will provide
 #'   the arguments for range date inputs. Only applies when `x` is of class
-#'   `Date` or `POSIXt`. \cr
+#'   `Date` or `POSIXt`.}
 #'
-#'   `textbox` \tab
+#'   \item{textbox}{
 #'   *(character)*. Logical. If `FALSE` (the default), `args_filter_input()`
-#'   will provide the arguments for select inputs. \cr
+#'   will provide the arguments for select inputs.}
 #'
-#'   `choices_asis` \tab
-#'   *(character, factor, list, logical)*. Logical. If `TRUE`, the choices
+#'   \item{choices_asis}{
+#'   *(character, factor, logical)*. Logical. If `TRUE`, the choices
 #'   provided to select inputs will not be modified. If `FALSE` (the default),
 #'   duplicate values will be removed and the choices will be sorted. Only
-#'   applies when `x` is of class `character`, `factor`, `list`, or
-#'   `logical`. \cr
+#'   applies when `x` is of class `character`, `factor`, or `logical`.}
 #'
-#'   `server` \tab
+#'   \item{server}{
 #'   If `TRUE`, indicates that the choices will be provided server-side. In
 #'   this case, arguments are not computed for `args_filter_input()`. Ignored
-#'   in `args_update_filter_input()`. \cr
+#'   in `args_update_filter_input()`.}
+#'
+#'   \item{args_unique}{
+#'   An optional named list of arguments passed to [unique()], called when `x`
+#'   is a *character*, *factor*, or *logical*, `textbox = FALSE`, and
+#'   `choices_asis = FALSE`.}
+#'
+#'   \item{args_sort}{
+#'   An optional named list of arguments passed to [sort()], which is called
+#'   after [unique()].}
 #' }
 #'
-#' @return A named list of arguments for a \pkg{shiny} input function
+#' @returns A named list of arguments for a \pkg{shiny} input function
 #'
 #' @examples
 #' args_filter_input(iris$Petal.Length)
@@ -104,15 +112,39 @@ method(args_filter_input, class_POSIXt) <- function(x, ...) {
 }
 
 # Function: ._discrete_choice_inputs ####
-._discrete_choice_inputs <- function(x, choices_asis, ...) {
+._discrete_choice_inputs <- function(
+	x,
+	choices_asis,
+	args_unique = NULL,
+	args_sort = NULL,
+	...
+) {
+	check_supplied_arguments(args_unique)
+	check_supplied_arguments(args_sort)
 	args <- list(...)
 	if (isTRUE(args$server)) {
 		return(list(choices = ""))
 	}
 	if (!isTRUE(choices_asis)) {
-		x <- sort(unique(x))
+		x <- do.call(unique, c(list(x = x), args_unique))
+		x <- do.call(sort, c(list(x = x), args_sort))
 	}
 	list(choices = x)
+}
+
+check_supplied_arguments <- function(args) {
+	if (is.null(args) || identical(args, list())) {
+		return(invisible())
+	}
+	if (!is.list(args)) {
+		stop("Supplied arguments must be a list.")
+	}
+	if (any(names(args) == "")) {
+		stop("All supplied arguments must be named.")
+	}
+	if (!identical(names(args), unique(names(args)))) {
+		stop("All argument names must be unique.")
+	}
 }
 
 # Function: args_update_filter_input ####
@@ -124,7 +156,11 @@ args_update_filter_input <- function(x, ...) {
 		args_provided$server <- FALSE
 	}
 	args <- do.call(args_filter_input, c(list(x = x), args_provided))
-	args[[arg_name_input_id(x)]] <- NULL
-	args[[arg_name_input_value(x)]] <- NULL
+	if (all(arg_name_input_value(x) %in% names(args))) {
+		args <- args[names(args) != arg_name_input_value(x)]
+		if (identical(length(args), 0L)) {
+			return(NULL)
+		}
+	}
 	return(args)
 }

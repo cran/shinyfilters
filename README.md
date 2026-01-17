@@ -7,6 +7,10 @@
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/shinyfilters)](https://CRAN.R-project.org/package=shinyfilters)
+[![Codecov test
+coverage](https://codecov.io/gh/joshwlivingston/shinyfilters/graph/badge.svg)](https://app.codecov.io/gh/joshwlivingston/shinyfilters)
+[![r-universe
+status](https://joshwlivingston.r-universe.dev/shinyfilters/badges/version)](https://joshwlivingston.r-universe.dev/shinyfilters)
 [![R-CMD-check](https://github.com/joshwlivingston/shinyfilters/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/joshwlivingston/shinyfilters/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
@@ -15,7 +19,7 @@ status](https://www.r-pkg.org/badges/version/shinyfilters)](https://CRAN.R-proje
 *shinyfilters* makes it easy to create Shiny inputs from vectors,
 data.frames, and more.
 
-- `filterInput()`: Create filter inputs on any object
+- `filterInput()`: Create filter inputs from any object
 - `updateFilterInput()`: Update filter inputs
 - `serverFilterInput()`: Server logic to update filter inputs
 - `apply_filters()`: Apply filter inputs to objects
@@ -46,14 +50,12 @@ library(shiny)
 ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
-            #############################################
             # Create a filterInput() inside a shiny app:
             filterInput(
                 x = letters,
-                id = "letter",
+                inputId = "letter",
                 label = "Pick a letter:"
             )
-            #############################################
         ),
         mainPanel(
             textOutput("selected_letter")
@@ -88,8 +90,7 @@ df <- data.frame(
 ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
-            #############################################################
-            # 1. Create a filterInput() for each column in a data.frame:
+            # 1/3. Create a filterInput() for each column in a data.frame:
             filterInput(
                 x = df,
                 range = TRUE,
@@ -97,7 +98,6 @@ ui <- fluidPage(
                 slider = TRUE,
                 multiple = TRUE
             )
-            #############################################################
         ),
         mainPanel(
             DTOutput("df_full"),
@@ -109,22 +109,18 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
     output$df_full <- renderDT(datatable(df))
-    ################################################################
-    # 2. Create a server to manage the data.frame's filterInput()'s
+    # 2/3. Create a server to manage the data.frame's filterInput()'s
     res <- serverFilterInput(
         x = df, 
         input = input, 
         range = TRUE
     )
-    ################################################################
     
-    #####################################################
-    # 3. Use the server's results
+    # 3/3. Use the server's results
     output$input_values <- renderPrint(res$input_values)
     output$df_filt <- renderDT(datatable(
         apply_filters(df, res$input_values)
     ))
-    #####################################################
 }
 
 shinyApp(ui, server)

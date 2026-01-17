@@ -415,7 +415,7 @@ error:</p>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(shiny)</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">filterInput</span>(people, <span class="at">inputId =</span> <span class="st">&quot;people&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Pick a person:&quot;</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; Error in as.vector(x, &quot;character&quot;): cannot coerce type &#39;closure&#39; to vector of type &#39;character&#39;</span></span></code></pre></div>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; Error in s7_check_is_valid_list_dispatch(x, function_name = &quot;filterInput&quot;): No method found for `filterInput()` for class `People`.</span></span></code></pre></div>
 <p>To allow <code>filterInput()</code> to be called on
 <code>people</code>, you can <em>extend</em>
 <code>filterInput()</code>.</p>
@@ -444,7 +444,7 @@ arguments.</p>
 <p><em>Now</em>, if we run <code>filterInput()</code> on
 <code>people</code>…</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">filterInput</span>(people, <span class="at">inputId =</span> <span class="st">&quot;people&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Pick a person:&quot;</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; Error in as.vector(x, &quot;character&quot;): cannot coerce type &#39;closure&#39; to vector of type &#39;character&#39;</span></span></code></pre></div>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; Error in s7_check_is_valid_list_dispatch(x, function_name = &quot;args_filter_input&quot;): No method found for `args_filter_input()` for class `People`.</span></span></code></pre></div>
 <p>… we’ll still get an error.</p>
 <p>To fix <em>this</em> error, you need to define a method for
 <code>args_filter_input()</code>.</p>

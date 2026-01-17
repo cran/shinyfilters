@@ -3,7 +3,7 @@
 # Generic to create shiny inputs from objects
 
 # Generic: filterInput ####
-#' Create a \pkg{shiny} Input
+#' Update a \pkg{shiny} Input
 #'
 #' Updates a \pkg{shiny} input based the type of object `x` and other arguments.
 #'
@@ -20,36 +20,42 @@
 #  @param tags cannot be used for these arguments without a CRAN error, since
 #  they are not named formals of the generic.
 #  ---------
-#' \tabular{ll}{
-#'   `area` \tab
+#' \describe{
+#'   \item{area}{
 #'    *(character)*. Logical. Controls whether to use  [shiny::updateTextAreaInput]
 #'    (`TRUE`) or [shiny::updateTextInput] (`FALSE`, default). Only applies when
-#'    `textbox` is `TRUE`. \cr
+#'    `textbox` is `TRUE`.}
 #'
-#'   `range` \tab
+#'   \item{radio}{
+#'     *(character, factor, list, logical)*. Logical. Controls whether to use
+#'     [shiny::updateRadioButtons] (`TRUE`) or a dropdown input update function
+#'     (`FALSE`, default). For character vectors, `radio` only applies if
+#'     `textbox` is `FALSE`, the default.}
+#'
+#'   \item{range}{
 #'   *(Date, POSIXt)*. Logical. Controls whether to use [shiny::updateDateRangeInput]
-#'   (`TRUE`) or [shiny::updateDateInput] (`FALSE`, default). \cr
+#'   (`TRUE`) or [shiny::updateDateInput] (`FALSE`, default).}
 #'
-#'   `selectize` \tab
+#'   \item{selectize}{
 #'   *(character, factor, list, logical)*. Logical. Controls whether to use
 #'   [shiny::updateSelectizeInput] (`TRUE`) or [shiny::updateSelectInput]
 #'   (`FALSE`, default). For character vectors, `selectize` only applies if
-#'   `textbox` is `FALSE`, the default. \cr
+#'   `textbox` is `FALSE`, the default.}
 #'
-#'   `slider` \tab
+#'   \item{slider}{
 #'   *(numeric)*. Logical. Controls whether to use [shiny::updateSliderInput]
-#'   (`TRUE`) or [shiny::updateNumericInput] (`FALSE`, default)  . \cr
+#'   (`TRUE`) or [shiny::updateNumericInput] (`FALSE`, default).}
 #'
-#'   `textbox` \tab
+#'   \item{textbox}{
 #'   *(character)*. Logical. Controls whether to update a text input
-#'   (`TRUE`) or a dropdown input (`FALSE`, default). \cr
+#'   (`TRUE`) or a dropdown input (`FALSE`, default).}
 #'
 #' }
 #'
 #' Remaining arguments passed to `...` are passed to
 #' [args_update_filter_input()] or the selected input update function.
 #'
-#' @return The result of the following \pkg{shiny} input updates is returned,
+#' @returns The result of the following \pkg{shiny} input updates is returned,
 #' based on the type of object passed to `x`, and other specified arguments.
 #'
 #' \tabular{lll}{
@@ -100,10 +106,8 @@
 #' 		if (!is.null(input$letter) && length(input$letter) != 0L) {
 #' 			fruits_filtered <- fruits[input$letter]
 #' 		}
-#' 		#########################################################
-#' 		# 2. Call updateFilterInput() inside the shiny server:
+#' 		# Call updateFilterInput() inside the shiny server:
 #' 		updateFilterInput(x = fruits_filtered, inputId = "fruits")
-#' 		#########################################################
 #' 	})
 #' }
 #' shinyApp(ui, server)
@@ -131,22 +135,19 @@ method(updateFilterInput, class_character) <- function(x, ...) {
 }
 
 ## Method: data.frame ####
-method(updateFilterInput, class_data.frame) <- function(x, input, ...) {
+method(updateFilterInput, class_data.frame) <- function(x, ...) {
 	mapply(
 		function(col, nm) {
-			val <- input[[nm]]
-			if (!is.null(val) || !identical(length(val), 0L)) {
-				return(invisible())
+			base_args <- list(col)
+			args_provided <- list(...)
+			inputId <- arg_name_input_id(col, ...)
+			if (!(inputId %in% names(args_provided))) {
+				base_args <- c(base_args, list(nm))
+				names(base_args) <- c("x", inputId)
+			} else {
+				names(base_args) <- c("x")
 			}
-
-			do.call(
-				updateFilterInput,
-				c(
-					list(x = col, inputId = nm),
-					list(...),
-					set_names(as_list_(val), arg_name_input_value(col, ...))
-				)
-			)
+			do.call(updateFilterInput, c(base_args, args_provided))
 		},
 		x,
 		get_input_ids(x),
