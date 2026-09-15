@@ -415,7 +415,8 @@ error:</p>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(shiny)</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">filterInput</span>(people, <span class="at">inputId =</span> <span class="st">&quot;people&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Pick a person:&quot;</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; Error in s7_check_is_valid_list_dispatch(x, function_name = &quot;filterInput&quot;): No method found for `filterInput()` for class `People`.</span></span></code></pre></div>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; Error in `s7_check_is_valid_list_dispatch()`:</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; ! No method found for `filterInput()` for class `People`.</span></span></code></pre></div>
 <p>To allow <code>filterInput()</code> to be called on
 <code>people</code>, you can <em>extend</em>
 <code>filterInput()</code>.</p>
@@ -444,7 +445,8 @@ arguments.</p>
 <p><em>Now</em>, if we run <code>filterInput()</code> on
 <code>people</code>…</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">filterInput</span>(people, <span class="at">inputId =</span> <span class="st">&quot;people&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Pick a person:&quot;</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; Error in s7_check_is_valid_list_dispatch(x, function_name = &quot;args_filter_input&quot;): No method found for `args_filter_input()` for class `People`.</span></span></code></pre></div>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; Error in `s7_check_is_valid_list_dispatch()`:</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; ! No method found for `args_filter_input()` for class `People`.</span></span></code></pre></div>
 <p>… we’ll still get an error.</p>
 <p>To fix <em>this</em> error, you need to define a method for
 <code>args_filter_input()</code>.</p>
@@ -575,7 +577,8 @@ opportunity for confusing errors to emerge:</p>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;Pick a person:&quot;</span>,</span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>    <span class="at">choices =</span> <span class="fu">full_names</span>(people)</span>
 <span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>)</span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; Error in selectInput(inputId, ..., selectize = FALSE, width = width): formal argument &quot;choices&quot; matched by multiple actual arguments</span></span></code></pre></div>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; Error in `selectInput()`:</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt; ! formal argument &quot;choices&quot; matched by multiple actual arguments</span></span></code></pre></div>
 <blockquote>
 <p>Error in … : formal argument “choices” matched by multiple actual
 arguments</p>
@@ -605,7 +608,8 @@ handling the argument prep dynamically (via
 <span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;Pick a person:&quot;</span>,</span>
 <span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>    <span class="at">choices =</span> <span class="fu">full_names</span>(people)</span>
 <span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>)</span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt; Error in error_input_args(x, names(args)): The argument `choices` is not supported in when used with `People` objects.</span></span></code></pre></div>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt; Error in `error_input_args()`:</span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="co">#&gt; ! The argument `choices` is not supported in when used with `People` objects.</span></span></code></pre></div>
 </div>
 
 
